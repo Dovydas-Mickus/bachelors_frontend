@@ -1,0 +1,43 @@
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+
+import 'core/repositories/API.dart';
+import 'frontend/login_screen/login_screen.dart';
+import 'frontend/main_screen/cubit/app_cubit.dart';
+import 'frontend/main_screen/main_screen.dart';
+import 'frontend/main_screen/theme_data/cubit/theme_cubit.dart';
+import 'frontend/main_screen/theme_data/theme_data.dart';
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    RepositoryProvider(
+      create: (context) => APIRepository(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => ThemeCubit()),
+          BlocProvider(
+            create: (context) => AppCubit(
+              api: RepositoryProvider.of<APIRepository>(context),
+            ),
+          ),
+        ],
+        child: BlocBuilder<ThemeCubit, ThemeState>(
+          builder: (context, state) {
+            return MaterialApp(
+              theme: lightTheme,
+              darkTheme: darkTheme,
+              themeMode: context.read<ThemeCubit>().state.themeMode,
+              routes: {
+                '/login': (context) => LoginScreen(),
+              },
+              home: MainScreen(),
+            );
+          },
+        ),
+      ),
+    ),
+  );
+}
