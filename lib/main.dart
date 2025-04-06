@@ -30,7 +30,7 @@ void main() {
             return MaterialApp(
               theme: lightTheme,
               darkTheme: darkTheme,
-              themeMode: context.read<ThemeCubit>().state.themeMode,
+              themeMode: state.themeMode,
               routes: {
                 '/login': (context) => LoginScreen(),
               },

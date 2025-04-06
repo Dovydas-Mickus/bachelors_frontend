@@ -6,7 +6,6 @@ class ThemeState extends Equatable {
   final ThemeMode themeMode;
 
   @override
-  // TODO: implement props
   List<Object?> get props => [themeMode];
 
   ThemeState copyWith({

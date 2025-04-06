@@ -30,6 +30,7 @@ class ExpandedFiles extends StatelessWidget {
 
         return Column(
           children: [
+            SizedBox(height: 30,),
             if (state.path.isNotEmpty)
               ListTile(
                 leading: Icon(Icons.arrow_back),

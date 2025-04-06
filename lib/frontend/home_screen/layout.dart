@@ -20,7 +20,7 @@ class Layout extends StatelessWidget {
     final isDesktop = screenWidth >= 800;
 
     return Scaffold(
-      appBar: AppBar(title: header),
+      appBar: AppBar(title: header, scrolledUnderElevation: 0, shadowColor: Theme.of(context).dialogBackgroundColor, elevation: 0,),
 
       // Show drawers on mobile
       drawer: isDesktop ? null : Drawer(child: leftSide),

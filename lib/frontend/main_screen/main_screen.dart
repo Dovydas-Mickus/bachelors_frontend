@@ -18,7 +18,9 @@ class MainScreen extends StatelessWidget {
     return BlocBuilder<AppCubit, AppState>(builder: (context, state) {
         AppStatus appStatus = context.read<AppCubit>().state.appStatus;
         if(appStatus == AppStatus.loading) {
-          return CircularProgressIndicator();
+          return Scaffold(
+            body: CircularProgressIndicator(),
+          );
         }
         if (appStatus == AppStatus.loggedOut) {
           return LoginScreen();
