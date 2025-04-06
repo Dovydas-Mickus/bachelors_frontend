@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/repositories/API.dart';
 import '../home_screen/home_screen.dart';
+import '../home_screen/src/files/cubit/files_cubit.dart';
 import '../login_screen/login_screen.dart';
 import 'cubit/app_cubit.dart';
 
@@ -26,7 +27,9 @@ class MainScreen extends StatelessWidget {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             context.read<APIRepository>().fetchCloud();
           });
-          return HomeScreen();
+          return BlocProvider(create: (context) => FilesCubit(api: context.read<APIRepository>())..loadFolder(''),
+          child: HomeScreen());
+
         }
         return Text('Something went wrong');
       }

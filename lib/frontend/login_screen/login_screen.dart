@@ -8,6 +8,21 @@ import 'cubit/login_cubit.dart';
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
+  void _submitLogin(BuildContext context) async {
+    final loginCubit = context.read<LoginCubit>();
+    final appCubit = context.read<AppCubit>();
+    final apiRepository = context.read<APIRepository>();
+
+    final email = loginCubit.state.email;
+    final password = loginCubit.state.password;
+
+    final isSuccess = await apiRepository.login(email, password);
+
+    if (!context.mounted) return;
+
+    appCubit.stateChanged(isSuccess ? AppStatus.loggedIn : AppStatus.loggedOut);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -22,43 +37,45 @@ class LoginScreen extends StatelessWidget {
               alignment: Alignment(0, 0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
                     width: 300,
-                    child: TextField(
+                    child: TextFormField(
                       decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(25.0))
-                          )
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                        ),
                       ),
                       onChanged: (value) {
                         context.read<LoginCubit>().emailChanged(value);
                       },
+                      textInputAction: TextInputAction.next,
                     ),
                   ),
                   SizedBox(height: 10),
                   SizedBox(
                     width: 300,
-                    child: TextField(
+                    child: TextFormField(
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(25.0))
-                        )
+                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                        ),
                       ),
                       onChanged: (value) {
                         context.read<LoginCubit>().passwordChanged(value);
                       },
+                      obscureText: true,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) {
+                        _submitLogin(context);
+                      },
                     ),
                   ),
-                  ElevatedButton(onPressed: () async {
-                    bool isSuccess = await context.read<APIRepository>().login(context.read<LoginCubit>().state.email, context.read<LoginCubit>().state.password);
-                    if(isSuccess) {
-                      context.read<AppCubit>().stateChanged(AppStatus.loggedIn);
-                    } else {
-                      context.read<AppCubit>().stateChanged(AppStatus.loggedOut);
-                    }
-                  }, child: Text('Login'))
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () => _submitLogin(context),
+                    child: Text('Login'),
+                  )
                 ],
               ),
             ),

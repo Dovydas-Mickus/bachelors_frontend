@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
@@ -9,6 +11,8 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 
 import 'package:dio/io.dart';
+import 'package:http_parser/http_parser.dart';
+
 
 import 'models/cloud_item.dart'; // Needed for IOHttpClientAdapter (non-web only)
 
@@ -172,9 +176,36 @@ class APIRepository {
     if (!await ensureTokenValid()) return false;
 
     try {
+      MultipartFile multipartFile;
+
+      if (kIsWeb) {
+        // On Web: file.bytes must not be null
+        if (file.bytes == null) {
+          debugPrint("❌ Upload failed: No file bytes found for web upload.");
+          return false;
+        }
+
+        multipartFile = MultipartFile.fromBytes(
+          file.bytes!,
+          filename: file.name,
+          contentType: MediaType("application", "octet-stream"), // Optional, adjust if known
+        );
+      } else {
+        // On Mobile/Desktop
+        if (file.path == null) {
+          debugPrint("❌ Upload failed: No file path found for non-web upload.");
+          return false;
+        }
+
+        multipartFile = await MultipartFile.fromFile(
+          file.path!,
+          filename: file.name,
+        );
+      }
+
       final formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile(file.path!, filename: file.name),
-        "path": uploadPath, // destination relative to root
+        "file": multipartFile,
+        "path": uploadPath,
       });
 
       final response = await dio.post(
@@ -200,4 +231,5 @@ class APIRepository {
 
     return false;
   }
+
 }

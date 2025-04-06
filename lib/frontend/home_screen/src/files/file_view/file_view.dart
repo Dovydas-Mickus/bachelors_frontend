@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:micki_nas/frontend/home_screen/src/files/components/pdf_viewer.dart';
 
 import '../../../../../core/repositories/API.dart';
 import 'cubit/file_view_cubit.dart';
@@ -29,18 +29,9 @@ class FileView extends StatelessWidget {
             return const Center(child: Icon(Icons.error, size: 48));
           }
 
-          return Stack(
-            children: [
-              _buildFilePreview(state),
-              Positioned(
-                top: 16,
-                right: 16,
-                child: IconButton(
-                  icon: const Icon(Icons.close, size: 30),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ),
-            ],
+          return Scaffold(
+            appBar: AppBar(),
+            body: _buildFilePreview(state),
           );
         },
       ),
@@ -78,7 +69,7 @@ class FileView extends StatelessWidget {
     if (contentType.startsWith("text/") || contentType == "application/json") {
       final text = utf8.decode(bytes, allowMalformed: true);
       return Padding(
-        padding: const EdgeInsets.only(top: 60, left: 16, right: 16, bottom: 16),
+        padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 16),
         child: Scrollbar(
           child: SingleChildScrollView(
             child: Align(
@@ -97,7 +88,7 @@ class FileView extends StatelessWidget {
     }
 
     if (contentType == "application/pdf") {
-      return SfPdfViewer.memory(bytes);
+      return PdfViewerScreen(pdfBytes: bytes);
     }
 
     return const Center(

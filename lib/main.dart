@@ -12,15 +12,16 @@ import 'frontend/main_screen/theme_data/theme_data.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  APIRepository api = APIRepository();
   runApp(
     RepositoryProvider(
-      create: (context) => APIRepository(),
+      create: (context) => api,
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => ThemeCubit()),
           BlocProvider(
             create: (context) => AppCubit(
-              api: RepositoryProvider.of<APIRepository>(context),
+              api: api,
             ),
           ),
         ],

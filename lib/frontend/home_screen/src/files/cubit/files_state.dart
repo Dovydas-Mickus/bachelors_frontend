@@ -1,6 +1,6 @@
 part of 'files_cubit.dart';
 
-class FilesState {
+class FilesState extends Equatable {
   final String path;
   final List<CloudItem> items;
   final bool isLoading;
@@ -22,5 +22,9 @@ class FilesState {
       isLoading: isLoading ?? this.isLoading,
     );
   }
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [path, items, isLoading];
 }
 
