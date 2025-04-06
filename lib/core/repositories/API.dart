@@ -232,4 +232,27 @@ class APIRepository {
     return false;
   }
 
+  Future<List<CloudItem>> getSearch(String query) async {
+    if (!await ensureTokenValid()) return [];
+    if (query == '') return [];
+    try {
+      final response = await dio.get("/search", queryParameters: {"q": query});
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return (data['results'] as List)
+            .map((item) => CloudItem.fromJson(item))
+            .toList();
+      } else if (response.statusCode == 401) {
+        final refreshed = await refreshAccessToken();
+        if (refreshed) return await getSearch(query);
+      }
+    } catch (e) {
+      debugPrint("❌ Search failed: $e");
+    }
+
+    return [];
+  }
+
+
 }

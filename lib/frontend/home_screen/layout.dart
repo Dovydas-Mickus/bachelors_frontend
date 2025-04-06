@@ -25,7 +25,7 @@ class Layout extends StatelessWidget {
       // Show drawers on mobile
       drawer: isDesktop ? null : Drawer(child: leftSide),
       endDrawer: isDesktop ? null : Drawer(child: rightSide),
-
+      endDrawerEnableOpenDragGesture: false,
       body: isDesktop
           ? Row(
         children: [

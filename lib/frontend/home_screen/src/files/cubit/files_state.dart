@@ -5,7 +5,7 @@ class FilesState extends Equatable {
   final List<CloudItem> items;
   final bool isLoading;
 
-  FilesState({
+  const FilesState({
     required this.path,
     required this.items,
     this.isLoading = false,
