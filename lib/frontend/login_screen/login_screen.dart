@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:micki_nas/frontend/login_screen/inputs/email_field.dart';
+import 'package:micki_nas/frontend/login_screen/inputs/password_field.dart';
 
 import '../../core/repositories/API.dart';
 import '../main_screen/cubit/app_cubit.dart';
@@ -15,10 +17,8 @@ class LoginScreen extends StatelessWidget {
 
     final email = loginCubit.state.email;
     final password = loginCubit.state.password;
-
+    appCubit.stateChanged(AppStatus.loading);
     final isSuccess = await apiRepository.login(email, password);
-
-    if (!context.mounted) return;
 
     appCubit.stateChanged(isSuccess ? AppStatus.loggedIn : AppStatus.loggedOut);
   }
@@ -31,46 +31,33 @@ class LoginScreen extends StatelessWidget {
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
-              title: Text('Login Screen'),
+              title: Text(''),
             ),
             body: Align(
-              alignment: Alignment(0, 0),
+              alignment: Alignment(0, -0.3),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  Text(
+                    'Login',
+                    style: TextStyle(
+                      fontSize: 40,
+                    ),
+                  ),
+                  SizedBox(height: 50),
                   SizedBox(
                     width: 300,
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        context.read<LoginCubit>().emailChanged(value);
-                      },
-                      textInputAction: TextInputAction.next,
-                    ),
+                    child: EmailField(),
                   ),
                   SizedBox(height: 10),
                   SizedBox(
                     width: 300,
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        context.read<LoginCubit>().passwordChanged(value);
-                      },
-                      obscureText: true,
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) {
-                        _submitLogin(context);
-                      },
+                    child: PasswordField(
+                      // When the user presses enter in the password field, submit the login.
+                      onFieldSubmitted: (_) => _submitLogin(context),
                     ),
                   ),
+
                   SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () => _submitLogin(context),

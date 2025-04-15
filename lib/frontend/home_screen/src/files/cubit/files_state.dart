@@ -24,7 +24,6 @@ class FilesState extends Equatable {
   }
 
   @override
-  // TODO: implement props
   List<Object?> get props => [path, items, isLoading];
 }
 

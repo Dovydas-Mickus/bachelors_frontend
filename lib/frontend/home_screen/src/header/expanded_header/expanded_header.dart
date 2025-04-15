@@ -7,6 +7,7 @@ class ExpandedHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+
       children: [
         const Expanded(
           flex: 3,

@@ -8,8 +8,12 @@ class ThemeToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(onPressed: () {
-      context.read<ThemeCubit>().themeChanged();
+    return ElevatedButton(onPressed: () async {
+      context.read<FilesCubit>().statusChanged(true);
+      await context.read<ThemeCubit>().themeChanged();
+      if(context.mounted) {
+        context.read<FilesCubit>().statusChanged(false);
+      }
     }, child: Text('Change theme'));
   }
 }

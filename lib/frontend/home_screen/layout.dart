@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants.dart';
+
 class Layout extends StatelessWidget {
   final Widget header;
   final Widget leftSide;
@@ -17,10 +19,10 @@ class Layout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth >= 800;
+    final isDesktop = screenWidth >= CONSTRAINTS_BREAKPOINT;
 
     return Scaffold(
-      appBar: AppBar(title: header, scrolledUnderElevation: 0, shadowColor: Theme.of(context).dialogBackgroundColor, elevation: 0,),
+      appBar: AppBar(title: header, forceMaterialTransparency: true,),
 
       // Show drawers on mobile
       drawer: isDesktop ? null : Drawer(child: leftSide),

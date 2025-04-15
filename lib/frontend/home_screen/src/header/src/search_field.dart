@@ -40,44 +40,47 @@ class _SearchFieldState extends State<SearchField> {
     return GestureDetector(
       onTap: _closeSearch,
       behavior: HitTestBehavior.translucent,
-      child: SearchAnchor.bar(
-        barHintText: 'Search',
-        barElevation: WidgetStateProperty.all(0),
-        searchController: _controller,
-        suggestionsBuilder: (BuildContext context, SearchController controller) async {
-          final List<CloudItem> results = await context.read<APIRepository>().getSearch(controller.text);
+      child: SizedBox(
+        height: 45,
+        child: SearchAnchor.bar(
+          barHintText: 'Search',
+          barElevation: WidgetStateProperty.all(0),
+          searchController: _controller,
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
+            final List<CloudItem> results = await context.read<APIRepository>().getSearch(controller.text);
 
-          return List<ListTile>.generate(results.length, (int index) {
-            final CloudItem item = results[index];
+            return List<ListTile>.generate(results.length, (int index) {
+              final CloudItem item = results[index];
 
-            return ListTile(
-              title: Text(item.name),
-              onTap: () {
-                _closeSearch(); // close the search when tapping on a result
-
-                showGeneralDialog(
-                  context: context,
-                  barrierDismissible: true,
-                  barrierLabel: "File viewer",
-                  transitionDuration: const Duration(milliseconds: 150),
-                  pageBuilder: (context, anim1, anim2) {
-                    return Scaffold(
-                      body: SafeArea(
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          child: FileView(
-                            path: item.name,
-                            repo: context.read<APIRepository>(),
+              return ListTile(
+                title: Text(item.name.split('/').last),
+                onTap: () {
+                  _closeSearch(); // close the search when tapping on a result
+                  showGeneralDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    barrierLabel: "File viewer",
+                    transitionDuration: const Duration(milliseconds: 150),
+                    pageBuilder: (context, anim1, anim2) {
+                      return Scaffold(
+                        body: SafeArea(
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            child: FileView(
+                              path: item.name,
+                              name: item.name.split('/').last,
+                              repo: context.read<APIRepository>(),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          });
-        },
+                      );
+                    },
+                  );
+                },
+              );
+            });
+          },
+        ),
       ),
     );
   }

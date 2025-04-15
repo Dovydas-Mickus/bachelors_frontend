@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:micki_nas/frontend/home_screen/src/left_side_bar/src/create_folder_button.dart';
 
 import 'src/upload_button.dart';
 
@@ -7,10 +8,13 @@ class LeftSideBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         SizedBox(height: 40,),
         UploadButton(),
+        SizedBox(height: 10,),
+        CreateFolderButton(),
+
       ],
     );
   }

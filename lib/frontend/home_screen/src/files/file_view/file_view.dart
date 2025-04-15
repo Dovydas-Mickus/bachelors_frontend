@@ -11,8 +11,9 @@ import 'src/video_player/video_player.dart'; // Adjust path
 class FileView extends StatelessWidget {
   final String path;
   final APIRepository repo;
+  final String name;
 
-  const FileView({super.key, required this.path, required this.repo});
+  const FileView({super.key, required this.path, required this.name, required this.repo});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class FileView extends StatelessWidget {
           }
 
           return Scaffold(
-            appBar: AppBar(),
+            appBar: AppBar(title: Text(name)),
             body: _buildFilePreview(state),
           );
         },

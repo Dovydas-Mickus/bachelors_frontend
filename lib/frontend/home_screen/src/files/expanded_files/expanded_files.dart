@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:micki_nas/frontend/home_screen/src/files/components/submenu.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as p;
 
@@ -44,6 +45,7 @@ class ExpandedFiles extends StatelessWidget {
                   final item = sortedItems[index];
                   return ListTile(
                     leading: Icon(item.isDirectory ? Icons.folder : Icons.insert_drive_file),
+                    trailing: Submenu(path: sortedItems[index].name),
                     title: Text(
                       item.isDirectory
                           ? item.name
@@ -52,9 +54,7 @@ class ExpandedFiles extends StatelessWidget {
                     subtitle: item.isDirectory ? null : Text("${item.size ?? 0} bytes"),
                     onTap: item.isDirectory
                         ? () {
-                      final newPath = state.path.isEmpty
-                          ? item.name
-                          : "${state.path}/${item.name}";
+                      final newPath = item.name;
                       context.read<FilesCubit>().loadFolder(newPath);
                     }
                         : () {
@@ -68,16 +68,11 @@ class ExpandedFiles extends StatelessWidget {
                         barrierLabel: "File viewer",
                         transitionDuration: const Duration(milliseconds: 150),
                         pageBuilder: (context, anim1, anim2) {
-                          return Scaffold(
-                            body: SafeArea(
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width, // Force full screen width
-                                child: FileView(
+                          return FileView(
                                   path: fullPath,
+                                  name: item.name,
                                   repo: context.read<APIRepository>(),
-                                ),
-                              ),
-                            ),
+
                           );
                         },
                       );

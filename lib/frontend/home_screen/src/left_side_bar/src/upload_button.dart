@@ -6,23 +6,24 @@ import 'package:micki_nas/frontend/home_screen/src/files/cubit/files_cubit.dart'
 import '../../../../../core/repositories/API.dart';
 
 class UploadButton extends StatelessWidget {
-  final String uploadPath; // relative to root (e.g. '' or 'docs')
 
-  const UploadButton({super.key, this.uploadPath = ''});
+  const UploadButton({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     return ElevatedButton.icon(
       icon: const Icon(Icons.upload_file),
       label: const Text("Upload File"),
       onPressed: () async {
         final api = context.read<APIRepository>();
         final messenger = ScaffoldMessenger.of(context); // capture early
-
+        final String uploadPath = context.read<FilesCubit>().state.path;
         final picked = await FilePicker.platform.pickFiles();
 
         if (picked != null && picked.files.isNotEmpty) {
           final file = picked.files.first;
+
           final success = await api.uploadFile(file, uploadPath);
 
           messenger.showSnackBar(
@@ -35,7 +36,7 @@ class UploadButton extends StatelessWidget {
             ),
           );
           if(context.mounted) {
-            context.read<FilesCubit>().loadFolder('');
+            context.read<FilesCubit>().loadFolder(uploadPath);
           }
         }
       },

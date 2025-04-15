@@ -29,9 +29,8 @@ class ThemeCubit extends Cubit<ThemeState> {
     final newMode = state.themeMode == ThemeMode.light
         ? ThemeMode.dark
         : ThemeMode.light;
-
     emit(state.copyWith(themeMode: newMode));
-
+    await Future.delayed(Duration(milliseconds: 220));
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_themeKey, newMode.toString());
   }

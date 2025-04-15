@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:cookie_jar/cookie_jar.dart';
@@ -33,19 +34,34 @@ class APIRepository {
         "withCredentials": true,
       };
     } else {
-      final cookieJar = CookieJar();
-      dio.interceptors.add(CookieManager(cookieJar));
+      _setupCookieJar();
 
       // Only keep this for testing with self-signed certs
       (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient();
-        client.badCertificateCallback = (X509Certificate cert, String host, int port) {
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) {
           // Only allow self-signed during local dev (use proper cert in prod)
           return host == baseUrl;
         };
         return client;
       };
     }
+  }
+
+  // Use an async function to setup a PersistCookieJar
+  Future<void> _setupCookieJar() async {
+    // Importing path_provider to determine a persistent storage location
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String appDocPath = appDocDir.path;
+
+    // Create a PersistCookieJar that stores cookies on disk
+    PersistCookieJar cookieJar = PersistCookieJar(
+      ignoreExpires: false,
+      storage: FileStorage("$appDocPath/.cookies/"),
+    );
+
+    dio.interceptors.add(CookieManager(cookieJar));
   }
 
   Future<void> _setAccessTokenTimestamp() async {
@@ -232,6 +248,31 @@ class APIRepository {
     return false;
   }
 
+  Future<bool> deleteItem(String path) async {
+    if (!await ensureTokenValid()) return false;
+
+    try {
+      final res = await dio.delete(
+        "/delete",
+        data: {"path": path},
+      );
+
+      if (res.statusCode == 200) {
+        return true;
+      } else if (res.statusCode == 401) {
+        final refreshed = await refreshAccessToken();
+        if (refreshed) {
+          return await deleteItem(path); // Retry after refresh
+        }
+      }
+    } catch (e) {
+      debugPrint("❌ Error deleting item: $e");
+    }
+
+    return false;
+  }
+
+
   Future<List<CloudItem>> getSearch(String query) async {
     if (!await ensureTokenValid()) return [];
     if (query == '') return [];
@@ -254,5 +295,46 @@ class APIRepository {
     return [];
   }
 
+  Future<bool> createFolder(String path) async {
+    if (!await ensureTokenValid()) return false;
 
+    try {
+      final res = await dio.post(
+        "/mkdir",
+        data: {"path": path},
+      );
+
+      if (res.statusCode == 201) {
+        return true;
+      } else if (res.statusCode == 401) {
+        final refreshed = await refreshAccessToken();
+        if (refreshed) {
+          return await createFolder(path); // Retry after refreshing
+        }
+      }
+    } catch (e) {
+      debugPrint("❌ Error creating folder: $e");
+    }
+
+    return false;
+  }
+
+  Future<bool> renameItem(String oldPath, String newName) async {
+    if (!await ensureTokenValid()) return false;
+    try {
+      final res = await dio.post(
+        "/rename",
+        data: {"old_path": oldPath, "new_name": newName},
+      );
+      if (res.statusCode == 200) {
+        return true;
+      } else if (res.statusCode == 401) {
+        final refreshed = await refreshAccessToken();
+        if (refreshed) return await renameItem(oldPath, newName);
+      }
+    } catch (e) {
+      debugPrint("❌ Error renaming item: $e");
+    }
+    return false;
+  }
 }

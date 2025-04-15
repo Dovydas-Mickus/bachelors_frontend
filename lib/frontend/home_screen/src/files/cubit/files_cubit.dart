@@ -3,8 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/repositories/API.dart';
 import '../../../../../core/repositories/models/cloud_item.dart';
-
+import 'package:path/path.dart' as p;
 part 'files_state.dart';
+
+enum FilesStatus {
+  loading,
+  finished,
+  failed,
+}
 
 class FilesCubit extends Cubit<FilesState> {
   final APIRepository api;
@@ -16,16 +22,26 @@ class FilesCubit extends Cubit<FilesState> {
     emit(state.copyWith(isLoading: true));
     try {
       final items = await api.fetchCloud(path: path);
-      emit(FilesState(path: path, items: items, isLoading: false));
+      emit(state.copyWith(
+        path: path,
+        items: items,
+        isLoading: false,
+      ));
     } catch (e) {
       emit(state.copyWith(isLoading: false));
-      // handle error if needed
+      // Optionally: emit error state or log the error
     }
   }
 
+
+  void statusChanged (bool isLoading) {
+    emit(state.copyWith(
+      isLoading: isLoading
+    ));
+  }
+
   void goBack() {
-    final parts = state.path.split('/')..removeLast();
-    final newPath = parts.join('/');
-    loadFolder(newPath);
+    final newPath = p.dirname(state.path);
+    loadFolder(newPath == '.' ? '' : newPath);
   }
 }

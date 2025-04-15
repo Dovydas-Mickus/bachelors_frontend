@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 import 'core/repositories/API.dart';
+import 'frontend/home_screen/src/files/cubit/files_cubit.dart';
 import 'frontend/login_screen/login_screen.dart';
 import 'frontend/main_screen/cubit/app_cubit.dart';
 import 'frontend/main_screen/main_screen.dart';
@@ -19,6 +20,7 @@ void main() {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => ThemeCubit()),
+          BlocProvider(create: (context) => FilesCubit(api: context.read<APIRepository>())..loadFolder('')),
           BlocProvider(
             create: (context) => AppCubit(
               api: api,
