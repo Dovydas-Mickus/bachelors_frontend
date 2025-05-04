@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:micki_nas/frontend/home_screen/src/files/cubit/files_cubit.dart';
 
 import '../../core/repositories/API.dart';
 import '../home_screen/home_screen.dart';
@@ -27,11 +28,13 @@ class MainScreen extends StatelessWidget {
           return LoginScreen();
         }
         if (appStatus == AppStatus.loggedIn) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.read<APIRepository>().fetchCloud();
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            await context.read<APIRepository>().fetchCloud();
+            if (context.mounted) {
+              await context.read<FilesCubit>().loadFolder('');
+            }
           });
           return HomeScreen();
-
         }
         return Text('Something went wrong');
       }

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/repositories/API.dart';
@@ -18,21 +19,32 @@ class FilesCubit extends Cubit<FilesState> {
   FilesCubit({required this.api})
       : super(FilesState(path: '', items: [], isLoading: false));
 
-  Future<void> loadFolder(String path) async {
+  Future<void> loadFolder(
+      String path, {
+        String? userId,       // ← optional *named* parameter
+      }) async {
     emit(state.copyWith(isLoading: true));
+
+
     try {
-      final items = await api.fetchCloud(path: path);
+      final items = await api.fetchCloud(path: path, userId: api.userId);
+
       emit(state.copyWith(
         path: path,
+        userId: api.userId,   // keep it in the Cubit’s state
         items: items,
         isLoading: false,
       ));
     } catch (e) {
       emit(state.copyWith(isLoading: false));
-      // Optionally: emit error state or log the error
     }
   }
 
+  void clearFiles() {
+    debugPrint('[FilesCubit] Clearing files state.');
+    // Emit the defined initial state to reset everything.
+    emit(state.copyWith(items: [], userId: null, isLoading: false, path: ''));
+  }
 
   void statusChanged (bool isLoading) {
     emit(state.copyWith(

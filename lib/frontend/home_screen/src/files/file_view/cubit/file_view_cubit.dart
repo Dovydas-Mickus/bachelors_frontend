@@ -10,10 +10,10 @@ class FileViewCubit extends Cubit<FileViewState> {
 
   FileViewCubit({required this.repo}) : super(FileViewState());
 
-  Future<void> loadFile(String path) async {
+  Future<void> loadFile(String path, {String? userId}) async {
     emit(state.copyWith(isLoading: true));
 
-    final result = await repo.fetchFileBytes(path);
+    final result = await repo.fetchFileBytes(path, userId: userId);
     if (result != null) {
       emit(FileViewState(
         isLoading: false,

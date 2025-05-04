@@ -38,7 +38,6 @@ class RenameDialogState extends State<RenameDialog> {
         TextButton(
           onPressed: () {
             Navigator.of(context).pop(null);
-            print(_controller.value);
           },
           child: const Text('Cancel'),
         ),
