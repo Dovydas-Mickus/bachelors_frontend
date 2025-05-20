@@ -1,16 +1,42 @@
-# bachelors_frontend
+# Micki'NAS Frontend
 
-A new Flutter project.
+This is the frontend of **Micki'NAS**, a secure internal file storage system built as part of a Bachelor's thesis project. The application is developed using **Flutter** and serves as a cross-platform client (web, desktop, mobile) for accessing a NAS-like backend API built with Python Flask.
 
-## Getting Started
+## 🚀 Features
 
-This project is a starting point for a Flutter application.
+- User authentication via JWT
+- Role-based access control (Admin, Team Lead, User)
+- File upload/download/rename/delete
+- Folder creation and navigation
+- File sharing (individuals or entire teams)
+- Integrated document viewer (PDF, video, audio, etc.)
+- Audit log viewer for administrators
+- Light/Dark theme switching
+- Responsive UI for desktop and mobile
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠 Technologies
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Flutter** (Dart)
+- **flutter_bloc**, **formz** – for state management and validation
+- **dio**, **cookie_jar** – for HTTP requests and session management
+- **file_picker**, **open_file**, **video_player**, **pdfx** – for media/file interactions
+- **shared_preferences** – for local storage
+- **intl** – for formatting
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📦 Getting Started
+
+1. Clone the repo:
+
+```bash
+git clone https://github.com/yourusername/bachelors_frontend.git
+cd bachelors_frontend
+```
+
+Install dependencies:
+```bash
+flutter pub get
+```
+Run the app:
+```bash
+flutter run -d chrome   # or use a mobile/desktop target
+```
