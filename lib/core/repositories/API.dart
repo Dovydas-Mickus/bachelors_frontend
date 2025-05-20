@@ -35,7 +35,7 @@ class APIRepository {
   static const String _adminPrefix = '/admin';
   // No prefix needed for root ('/') or specific shared routes ('/share', '/shared/...')
 
-  APIRepository._internal({this.baseUrl = 'www.mickus.me'}) {
+  APIRepository._internal({this.baseUrl = 'cloud.mickus.me/api'}) {
     dio = Dio(BaseOptions(
       baseUrl: 'https://$baseUrl',
       headers: {'content-type': 'application/json'},
@@ -47,10 +47,26 @@ class APIRepository {
       dio.options.extra = {'withCredentials': true};
       debugPrint('[APIRepository] Web platform – using browser cookies');
     }
+
+    // ADDING LogInterceptor HERE (after initial Dio setup but before CookieManager for detailed view)
+    // This will show requests before CookieManager acts, and responses after.
+    // If you want to see exactly what CookieManager sends, place this *after* CookieManager.
+    // For debugging "missing cookie", seeing the raw server response (Set-Cookie) is key first.
+    dio.interceptors.add(LogInterceptor(
+      request: true,
+      requestHeader: true,
+      requestBody: true,
+      responseHeader: true,
+      responseBody: true, // Be careful with this in production for large responses
+      error: true,
+      logPrint: (object) {
+        debugPrint(object.toString()); // Ensures logs go to Flutter's debug console
+      },
+    ));
   }
 
   static Future<APIRepository> create(
-      {String baseUrl = 'www.mickus.me'}) async {
+      {String baseUrl = 'cloud.mickus.me/api'}) async {
     final repository = APIRepository._internal(baseUrl: baseUrl);
     await repository._initialize();
     return repository;
@@ -59,8 +75,14 @@ class APIRepository {
   Future<void> _initialize() async {
     debugPrint('[APIRepository] Initializing...');
     if (!kIsWeb) {
-      await _setupCookieJar();
+      await _setupCookieJar(); // This adds CookieManager to interceptors
     }
+    // If you want LogInterceptor to see what CookieManager sends on requests,
+    // you could move its addition to *after* _setupCookieJar (for non-web).
+    // However, for diagnosing "Set-Cookie" issues from the server on login,
+    // having LogInterceptor before CookieManager is better to see raw server response.
+    // For "Cookie" header missing on refresh, LogInterceptor *after* CookieManager helps.
+    // Let's keep it in the constructor for now, it will show server response headers fine.
     debugPrint('[APIRepository] Initialization complete.');
   }
 
@@ -145,6 +167,20 @@ class APIRepository {
 
   Future<bool> refreshAccessToken({ bool logoutOnFail = false }) async {
     debugPrint('[refreshAccessToken] Attempting POST $_authPrefix/refresh...'); // <-- PREFIXED
+
+    if (!kIsWeb && _cookieJar != null) {
+      final cookiesForRefresh = await _cookieJar!.loadForRequest(
+        // Ensure the URI exactly matches how Dio would form it for the request
+          dio.options.baseUrl.startsWith('https://') || dio.options.baseUrl.startsWith('http://')
+              ? Uri.parse('${dio.options.baseUrl}$_authPrefix/refresh')
+              : Uri.parse('https://${dio.options.baseUrl}$_authPrefix/refresh') // Assuming https if not specified
+      );
+      debugPrint('[refreshAccessToken] Cookies loaded by PersistCookieJar for $_authPrefix/refresh BEFORE request:');
+      for (var cookie in cookiesForRefresh) {
+        debugPrint('  ${cookie.name}=${cookie.value}; Path=${cookie.path}; Domain=${cookie.domain}; Expires=${cookie.expires}; HttpOnly=${cookie.httpOnly}');
+      }
+    }
+
     try {
       final response = await dio.post('$_authPrefix/refresh'); // <-- PREFIXED
       debugPrint('[refreshAccessToken] Received response status: ${response.statusCode}');
@@ -189,6 +225,28 @@ class APIRepository {
       if (response.statusCode == 200) {
         debugPrint("✅ Login successful for $email");
         await _setAccessTokenTimestamp();
+
+        // After successful login, explicitly check what cookies were stored (for non-web)
+        if (!kIsWeb && _cookieJar != null) {
+          final loginUri = dio.options.baseUrl.startsWith('https://') || dio.options.baseUrl.startsWith('http://')
+              ? Uri.parse('${dio.options.baseUrl}$_authPrefix/login')
+              : Uri.parse('https://${dio.options.baseUrl}$_authPrefix/login');
+
+          final cookiesAfterLogin = await _cookieJar!.loadForRequest(loginUri);
+          debugPrint('[login] Cookies loaded by PersistCookieJar AFTER login from ${loginUri.toString()}:');
+          for (var cookie in cookiesAfterLogin) {
+            debugPrint('  ${cookie.name}=${cookie.value}; Path=${cookie.path}; Domain=${cookie.domain}; Expires=${cookie.expires}; HttpOnly=${cookie.httpOnly}; Secure=${cookie.secure}; SameSite=${cookie.domain != null ? "N/A for PersistCookieJar" : "N/A"}');
+          }
+          // Check all cookies for the base domain as well, path '/'
+          final allCookiesBase = await _cookieJar!.loadForRequest(
+              Uri.parse(dio.options.baseUrl.startsWith('https://') || dio.options.baseUrl.startsWith('http://')
+                  ? dio.options.baseUrl
+                  : 'https://${dio.options.baseUrl}'));
+          debugPrint('[login] ALL Cookies loaded by PersistCookieJar for base domain ${dio.options.baseUrl} AFTER login:');
+          for (var cookie in allCookiesBase) {
+            debugPrint('  ${cookie.name}=${cookie.value}; Path=${cookie.path}; Domain=${cookie.domain}; Expires=${cookie.expires}; HttpOnly=${cookie.httpOnly}; Secure=${cookie.secure}; SameSite=${cookie.domain != null ? "N/A for PersistCookieJar" : "N/A"}');
+          }
+        }
         return true;
       } else {
         debugPrint("❌ Login failed for $email with status: ${response.statusCode}. Response: ${response.data}");
