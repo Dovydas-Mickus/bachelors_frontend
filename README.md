@@ -28,7 +28,7 @@ This is the frontend of **Micki'NAS**, a secure internal file storage system bui
 1. Clone the repo:
 
 ```bash
-git clone https://github.com/yourusername/bachelors_frontend.git
+git clone https://github.com/Dovydas-Mickus/bachelors_frontend.git
 cd bachelors_frontend
 ```
 
