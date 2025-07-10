@@ -22,42 +22,39 @@ class RightSideBar extends StatelessWidget {
 
         // Conditionally build UI based on the state
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 40),
-            SizedBox(width: 150, child: const ThemeToggleButton()),
+            const ThemeToggleButton(),
             const SizedBox(height: 10),
 
             // --- Check state type or properties ---
             // Option A: Check properties of the single UserState
             if (state.isLoaded && !state.isLoading) ...[ // Check if loaded and not currently loading
               if (state.role == 'admin') ...[ // Use state.role
-                SizedBox(
-                  width: 150,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => AdminPanelScreen())); // Use const if possible
-                    },
-                    child: const Text("Admin Panel"),
-                  ),
+                ListTile(
+                  leading: Icon(Icons.admin_panel_settings),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => AdminPanelScreen()));
+                  },
+                  title: Text('Admin Panel'),
                 ),
                 const SizedBox(height: 10),
               ],
               if (state.role == 'admin' || state.role == 'team_lead') ...[ // Use state.role
-                SizedBox(
-                  width: 150,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => TeamLeadTeamsScreen())); // Use const if possible
-                    },
-                    child: const Text("Teams Panel"),
-                  ),
+                ListTile(
+                  leading: Icon(Icons.people),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => TeamLeadTeamsScreen()));
+                  },
+                  title: Text('Teams Panel'),
                 ),
                 const SizedBox(height: 10),
               ],
               // Show logout only when loaded/logged in
-              SizedBox(width: 150, child: const LogoutButton()),
+              const LogoutButton(),
             ]
             else if (state.isLoading) ...[
               // Show a loading indicator if desired while profile reloads

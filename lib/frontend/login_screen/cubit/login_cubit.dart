@@ -6,7 +6,7 @@ part 'login_state.dart';
 class LoginCubit extends Cubit<LoginState> {
 
 
-  LoginCubit() : super(LoginState(email: '', password: ''));
+  LoginCubit() : super(LoginState(email: '', password: '', errorMessage: ''));
 
   void emailChanged(String email) {
     emit(state.copyWith(email: email));
@@ -14,5 +14,9 @@ class LoginCubit extends Cubit<LoginState> {
 
   void passwordChanged(String password) {
     emit(state.copyWith(password: password));
+  }
+
+  void errorMessageChanged(String errorMessage) {
+    emit(state.copyWith(errorMessage: errorMessage));
   }
 }

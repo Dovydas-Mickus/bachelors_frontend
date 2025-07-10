@@ -9,9 +9,10 @@ class LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return ListTile(
+      leading: Icon(Icons.lock),
       // Make onPressed async
-      onPressed: () async {
+      onTap: () async {
         // Call the orchestrated logout method in AppCubit
         // This handles loading state, API call, file clearing, and final state update
         await context.read<AppCubit>().performLogout();
@@ -21,7 +22,7 @@ class LogoutButton extends StatelessWidget {
         // context.read<AppCubit>().stateChanged(AppStatus.loggedOut); // Don't call directly
         // --- End Removal ---
       },
-      child: const Text('Logout'),
+      title: Text('Logout'),
     );
   }
 }
